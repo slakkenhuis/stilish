@@ -10,11 +10,11 @@ tiling WMs place on the user; and of how time-consuming it is to try all of
 them only to come to this conclusion. 
 
 At the moment, `stilish` is only an idea. I am currently fleshing it out by 
-writing a [proposal](doc/proposal.md). Since it's a personal hobby project, 
-I'm more concerned with 'getting it right' than with delivering — I will work 
-on it very sporadically, in my free time. Moreover, it is exhausting even to 
-*look* at the documentation for X; I'll be happy if I can achieve only part of 
-my proposal. Therefore, unless other developers take an interest, it will 
+writing a [proposal](PROPOSAL.md). Since it's a hobby project, I'm more 
+concerned with 'getting it right' than with delivering — I will work on it 
+very sporadically, in my free time. Moreover, it is exhausting even to *look* 
+at the documentation for X; so I'll be happy if I can achieve only part of my 
+proposal. Therefore, unless other developers take an interest, it will 
 probably take a while before the actual program is finished.
 
 

@@ -339,18 +339,4 @@ atuo-hide unmanaged window upon focusing managed windows, auto sticky floating
 windows, auto-manage classes of windows
 
 query: tree, window, status (tiled/floating/minimized/maximized)
-    
-
-Rejected ideas
-===============================================================================
-
-### Single orientation {#orientation}
-
-There is only a single defined orientation at the root of the tree. Any other 
-orientations are derived. The orientation of a tiling tree is horizontal (for 
-windows that are on top of one another) or vertical (for windows that are next 
-to one another). The orientation determines only the orientation of the top 
-level of the tree; it then alternates for every lower level. Therefore, to 
-find the orientation of a node, simply count the number of steps it is removed 
-from the root node.
 
