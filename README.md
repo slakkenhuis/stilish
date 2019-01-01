@@ -31,18 +31,15 @@ complete working environment. I can only suggest what I have tried:
     [xfwm](https://docs.xfce.org/xfce/xfwm4/start), or 
     [windowchef](https://github.com/tudurom/windowchef).
 
--   To interact with `stilish`, you will need to exchange messages with it.  
+-   To interact with `stilish`, you will need to exchange messages with it. 
     [jq](https://stedolan.github.io/jq/) is useful for composing and parsing 
     JSON messages, and [socat](http://www.dest-unreach.org/socat/) can send 
     and receive them. Of course, you will mostly be sending straightforward 
     commands via keyboard shortcuts, so you don't need to delve into all that: 
     example commands will be included for use with the keyboard shortcut tool 
-    [sxhkd](https://github.com/baskerville/sxhkd). For X event hooks, I still 
-    need to find a program. Perhaps I should write it myself, since it needs 
-    special knowledge (e.g. if a window is moved by the user, it should be 
-    automatically unmanaged).
+    [sxhkd](https://github.com/baskerville/sxhkd).
 
--   If your window manager doesn't come with a status bar, you could use  
+-   If your window manager doesn't come with a status bar, you could use 
     [polybar](https://github.com/jaagr/polybar), 
     [xfce4-panel](https://docs.xfce.org/xfce/xfce4-panel/start) or 
     [tint2](https://gitlab.com/o9000/tint2). For menu interaction, I'd use 
