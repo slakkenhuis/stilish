@@ -24,6 +24,9 @@ General philosophy
     code should anticipate that; but it would be a separate program that 
     merely shares some of the codebase.)
 
+-   Only the developer should ever have to think about the structure of the 
+    tiling tree. For the user, the movements should feel obvious.
+
 -   To reduce the mental load, it helps to have as few keyboard shortcuts as 
     possible. So, for example, resizing is an operation for which you only 
     need to remember a modifier and the directional keys: the first keypress 
@@ -38,7 +41,7 @@ General philosophy
     is not how applications are designed now. We therefore will skip tab 
     support entirely. What we *will* have is window stacking, because it is 
     often useful to have multiple windows occupying the same space. The 
-    windows (or frames) can be rotated through as in a carousel.
+    windows (or frames) can be rotated through, as in a carousel.
 
 -   I have not yet decided whether to use X or Wayland, and which programming 
     language to use. From what I can see, Wayland will have to be monolithic 
