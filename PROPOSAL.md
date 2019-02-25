@@ -122,6 +122,8 @@ Tiling tree
            ╚════>├─────┤═>├───┬─┤═>├─┬─┬─┤
                  └─────┘  └───┴─┘  └─┴─┴─┘
 
+-   There should be a 'void' window that can be inserted anywhere, that is 
+    simply the absence of a window that does take up space.
 
 Managing windows
 -------------------------------------------------------------------------------
