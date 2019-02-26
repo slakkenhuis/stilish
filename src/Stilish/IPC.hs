@@ -6,7 +6,6 @@ module Stilish.IPC
    ( withUnixFileSocket
    , readMessage ) where
 
-import Control.Monad ( forever )
 import Control.Exception ( catch, throwIO, bracket )
 import System.Posix.Files ( removeLink )
 import System.IO.Error ( isDoesNotExistError )
@@ -55,9 +54,3 @@ remove path = removeLink path `catch` \e ->
    if isDoesNotExistError e
    then return ()
    else throwIO e
-
-
--- | Keep listening on a file socket and print the received messages.
-main :: IO ()
-main = withUnixFileSocket "/tmp/stilish.sock" $ \sock ->
-   forever (readMessage sock >>= B.putStrLn)
