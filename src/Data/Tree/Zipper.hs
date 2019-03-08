@@ -29,7 +29,7 @@ loopCollect f x = case f x of
 -- * Construction
 
 -- | A 'Tree' is represented simply by its root node.
-newtype Tree internal external = Tree (Node internal external) deriving Show
+newtype Tree internal external = Tree (Node internal external)
 
 
 -- | Each 'Node' in a 'Tree' is labelled with one of two seperate data types:
@@ -37,7 +37,7 @@ newtype Tree internal external = Tree (Node internal external) deriving Show
 data Node internal external = Node
    { nodeContent :: NodeContent internal external
    , nodeContext :: Maybe (NodeContext internal external)
-   } deriving Show
+   }
 
 
 -- | The content of a 'Node' is a value of type @i@ or @e@. Moreover, internal
@@ -45,7 +45,7 @@ data Node internal external = Node
 -- in focus.
 data NodeContent i e 
    = InternalNode i (Node i e)
-   | ExternalNode e deriving Show
+   | ExternalNode e
 
 
 -- | Every node except the root node has a context: a reference to its parent
@@ -55,7 +55,7 @@ data NodeContext i e = NodeContext
    { parent :: Node i e
    , leftSibling :: Maybe (Node i e)
    , rightSibling :: Maybe (Node i e)
-   } deriving Show
+   }
 
 
 -- | Make a tree consisting of a single external node.
@@ -227,4 +227,24 @@ isRoot = isNothing . nodeContext
 -- | Check if a node has no siblings.
 isOnlyChild :: Node i e -> Bool
 isOnlyChild node = isNothing $ left node <|> right node
+
+
+-------------------------------------------------------------------------------
+-- * Instances
+
+instance (Show i, Show e) => Show (Tree i e) where
+   show = show . root
+
+instance (Show i, Show e) => Show (Node i e) where
+   show = show' "" . (:[])
+
+      where
+      show' _        []          = ""
+      show' leveller (node:rest) = 
+         let (prefix, level)
+                | null rest = (" └╴","   ")
+                | otherwise = (" ├╴"," │ ")
+         in  leveller ++ prefix ++ either show show (content node) ++ "\n" ++
+             show' (leveller ++ level) (children node) ++ 
+             show' leveller            rest
 
