@@ -244,7 +244,7 @@ instance (Show i, Show e) => Show (Node i e) where
          let (prefix, level)
                 | null rest = (" └╴","   ")
                 | otherwise = (" ├╴"," │ ")
-         in  leveller ++ prefix ++ either show show (content node) ++ "\n" ++
+         in  "\n" ++ leveller ++ prefix ++ either show show (content node) ++
              show' (leveller ++ level) (children node) ++ 
              show' leveller            rest
 
