@@ -106,21 +106,30 @@ delete node = undefined -- TODO
 -- siblings. Will be nonsensical if they are not, and will throw an error if
 -- one of them is a root node.
 addNodeAux :: Maybe (Node i e) -> Maybe (Node i e) -> Tree i e -> Node i e
-addNodeAux nodeLeft nodeRight (Tree tree) = nodeCenter where
+addNodeAux nodeLeft nodeRight (Tree node) = nodeCenter where
    nodeCenter = Node
-      { nodeContent = nodeContent tree
+      { nodeContent = nodeContent node
       , nodeContext = Just NodeContext
-         { parent = fromJust $ (nodeLeft <|> nodeRight) >>= up -- the original node must not be root
-         , leftSibling = changeContext (\(Just c) -> Just c { rightSibling = Just nodeCenter }) <$> nodeLeft
-         , rightSibling = changeContext (\(Just c) -> Just c { leftSibling = Just nodeCenter }) <$> nodeRight
+         { parent = fromJust $ (nodeLeft <|> nodeRight) >>= up 
+         , leftSibling = changeRightSibling (Just nodeCenter) <$> nodeLeft
+         , rightSibling = changeLeftSibling (Just nodeCenter) <$> nodeRight
          }
       }
 
 
-   -- | Auxiliary: Change the context of a node.
-   changeContext :: (Maybe (NodeContext i e) -> Maybe (NodeContext i e)) -> Node i e -> Node i e
-   changeContext f n = n { nodeContext = f $ nodeContext n }
+-- | Auxiliary: Change the context of a non-root node.
+changeContext :: (NodeContext i e -> NodeContext i e) -> Node i e -> Node i e
+changeContext f n = n { nodeContext = f <$> nodeContext n }
 
+
+-- | Auxiliary: Change the left sibling of a non-root node.
+changeLeftSibling :: Maybe (Node i e) -> Node i e -> Node i e 
+changeLeftSibling new = changeContext (\c -> c { leftSibling = new })
+
+
+-- | Auxiliary: Change the left sibling of a non-root node.
+changeRightSibling :: Maybe (Node i e) -> Node i e -> Node i e 
+changeRightSibling new = changeContext (\c -> c { rightSibling = new })
 
 
 -------------------------------------------------------------------------------
