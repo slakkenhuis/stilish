@@ -33,24 +33,26 @@ newtype Tree internal external = Tree (Node internal external)
 
 
 -- | Each 'Node' in a 'Tree' is labelled with one of two seperate data types:
--- one for internal and one for external nodes.
+-- one for internal and one for external nodes. 
 data Node internal external = Node
    { nodeContent :: NodeContent internal external
    , nodeContext :: Maybe (NodeContext internal external)
    }
 
 
--- | The content of a 'Node' is a value of type @i@ or @e@. Moreover, internal
--- nodes contain a reference to one of its children - the one that is currently
--- in focus.
+-- | Whereas a 'Node' is decorated with contextual information, 'NodeContent'
+-- is the actual base node data type. Its content is a value of type @i@ or
+-- @e@. Moreover, internal nodes contain a reference to the child that was most
+-- recently in focus — there are no other guarantees as to what position this
+-- child occupies with respect to its siblings.
 data NodeContent i e 
    = InternalNode i (Node i e)
    | ExternalNode e
 
 
--- | Every node except the root node has a context: a reference to its parent
--- node and to its direct siblings on either side. This will allow for quick
--- tree operations on this purely functional data type (cf. Huet 1997).
+-- | Every node except the root node has a context. This context allows us to
+-- move through the tree of which it is part. It consists of references to its
+-- parent node and to its direct siblings on either side. 
 data NodeContext i e = NodeContext
    { parent :: Node i e
    , leftSibling :: Maybe (Node i e)
@@ -107,12 +109,15 @@ delete node = undefined -- TODO
 -- one of them is a root node.
 addNodeAux :: Maybe (Node i e) -> Maybe (Node i e) -> Tree i e -> Node i e
 addNodeAux nodeLeft nodeRight (Tree node) = nodeCenter where
+
+   nodeUp = fromJust $ (nodeLeft <|> nodeRight) >>= up
+
    nodeCenter = Node
       { nodeContent = nodeContent node
       , nodeContext = Just NodeContext
-         { parent = fromJust $ (nodeLeft <|> nodeRight) >>= up 
-         , leftSibling = changeRightSibling (Just nodeCenter) <$> nodeLeft
-         , rightSibling = changeLeftSibling (Just nodeCenter) <$> nodeRight
+         { parent = nodeUp
+         , leftSibling = changeParent nodeUp . changeRightSibling (Just nodeCenter) <$> nodeLeft
+         , rightSibling = changeParent nodeUp . changeLeftSibling (Just nodeCenter) <$> nodeRight
          }
       }
 
@@ -120,6 +125,18 @@ addNodeAux nodeLeft nodeRight (Tree node) = nodeCenter where
 -- | Auxiliary: Change the context of a non-root node.
 changeContext :: (NodeContext i e -> NodeContext i e) -> Node i e -> Node i e
 changeContext f n = n { nodeContext = f <$> nodeContext n }
+
+
+-- | Auxiliary: Change the representative child node of an internal node.
+changeChild :: Node i e -> Node i e -> Node i e
+changeChild newChild node = case node of
+   Node (InternalNode lbl _) ctx -> Node (InternalNode lbl newChild) ctx
+   _ -> error "only internal nodes can have children"
+
+
+-- | Auxiliary: Change the parent of a non-root node.
+changeParent :: Node i e -> Node i e -> Node i e 
+changeParent new = changeContext (\c -> c { parent = new })
 
 
 -- | Auxiliary: Change the left sibling of a non-root node.
@@ -137,12 +154,20 @@ changeRightSibling new = changeContext (\c -> c { rightSibling = new })
 
 -- | Move to the sibling left of the given node.
 left :: Node i e -> Maybe (Node i e)
-left = nodeContext >=> leftSibling
+left node = do
+   ctx <- nodeContext node 
+   left' <- leftSibling ctx
+   let new = changeParent (changeChild new $ parent ctx) left'
+   return new
 
 
 -- | Move to the sibling right of the given node.
 right :: Node i e -> Maybe (Node i e)
-right = nodeContext >=> rightSibling
+right node = do
+   ctx <- nodeContext node 
+   right' <- rightSibling ctx
+   let new = changeParent (changeChild new $ parent ctx) right'
+   return new
 
 
 -- | Ascend to the parent of the given node.
@@ -152,7 +177,12 @@ up = fmap parent . nodeContext
 
 -- | Descend to the child of the given node that is currently in focus.
 down :: Node i e -> Maybe (Node i e)
-down n = case nodeContent n of
+down node = changeParent node <$> focus node
+
+
+-- | Auxiliary: Return the child that is currently in focus.
+focus :: Node i e -> Maybe (Node i e)
+focus node = case nodeContent node of
    InternalNode _ m -> Just m
    ExternalNode _ -> Nothing
 
