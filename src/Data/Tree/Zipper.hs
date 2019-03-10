@@ -1,3 +1,14 @@
+{-|
+Module      : Data.Tree.Zipper
+Description : Datastructure for a zipper tree.
+
+This module provides a datastructure for a Zipper tree in which internal and
+external nodes may be labelled by different datatypes.
+
+Simply put, a Zipper tree is a purely functional datatype that allows for quick
+manipulation due to passing around the constituent part that is currently in
+'focus', together with contextual inforation. See Huet 1997.
+-}
 module Data.Tree.Zipper where
 
 import Data.Maybe ( fromJust, isNothing )
