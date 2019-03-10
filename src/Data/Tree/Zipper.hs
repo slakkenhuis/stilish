@@ -46,25 +46,25 @@ newtype Tree internal external = Tree (Node internal external)
 -- | Each 'Node' in a 'Tree' is labelled with one of two seperate data types:
 -- one for internal and one for external nodes. 
 data Node internal external = Node
-   { nodeContent :: NodeContent internal external
-   , nodeContext :: Maybe (NodeContext internal external)
+   { plain :: PlainNode internal external
+   , context :: Maybe (Context internal external)
    }
 
 
--- | Whereas a 'Node' is decorated with contextual information, 'NodeContent'
+-- | Whereas a 'Node' is decorated with contextual information, 'PlainNode'
 -- is the actual base node data type. Its content is a value of type @i@ or
 -- @e@. Moreover, internal nodes contain a reference to the child that was most
 -- recently in focus — there are no other guarantees as to what position this
 -- child occupies with respect to its siblings.
-data NodeContent i e 
-   = InternalNode i (Node i e)
-   | ExternalNode e
+data PlainNode i e 
+   = Internal i (Node i e)
+   | External e
 
 
 -- | Every node except the root node has a context. This context allows us to
 -- move through the tree of which it is part. It consists of references to its
 -- parent node and to its direct siblings on either side. 
-data NodeContext i e = NodeContext
+data Context i e = Context
    { parent :: Node i e
    , leftSibling :: Maybe (Node i e)
    , rightSibling :: Maybe (Node i e)
@@ -74,23 +74,23 @@ data NodeContext i e = NodeContext
 -- | Make a tree consisting of a single external node.
 leaf :: e -> Tree i e
 leaf label = Tree Node 
-   { nodeContent = ExternalNode label
-   , nodeContext = Nothing }
+   { plain = External label
+   , context = Nothing }
 
 
 -- | Make a tree consisting of an internal node with the given subtrees. The
 -- list of subtrees must not be empty, since an internal node must have at
 -- least one child.
 branch :: i -> [Tree i e] -> Tree i e
-branch label (Tree child : children) = Tree parentNode
+branch label (Tree firstChild : children) = Tree parentNode
 
    where
    parentNode = Node 
-      { nodeContent = InternalNode label $ foldl addRight child' children
-      , nodeContext = Nothing }
+      { plain = Internal label $ foldl addRight firstChild' children
+      , context = Nothing }
 
-   child' = child 
-      { nodeContext = Just NodeContext 
+   firstChild' = firstChild
+      { context = Just Context 
          { parent = parentNode
          , leftSibling = Nothing
          , rightSibling = Nothing }
@@ -123,25 +123,24 @@ addNodeAux nodeLeft nodeRight (Tree node) = nodeCenter where
 
    nodeUp = fromJust $ (nodeLeft <|> nodeRight) >>= up
 
-   nodeCenter = Node
-      { nodeContent = nodeContent node
-      , nodeContext = Just NodeContext
-         { parent = nodeUp
-         , leftSibling = changeParent nodeUp . changeRightSibling (Just nodeCenter) <$> nodeLeft
-         , rightSibling = changeParent nodeUp . changeLeftSibling (Just nodeCenter) <$> nodeRight
+   nodeCenter = node
+      { context = Just Context
+         { parent = changeFocus nodeCenter nodeUp
+         , leftSibling = changeRightSibling (Just nodeCenter) <$> nodeLeft
+         , rightSibling = changeLeftSibling (Just nodeCenter) <$> nodeRight
          }
       }
 
 
 -- | Auxiliary: Change the context of a non-root node.
-changeContext :: (NodeContext i e -> NodeContext i e) -> Node i e -> Node i e
-changeContext f n = n { nodeContext = f <$> nodeContext n }
+changeContext :: (Context i e -> Context i e) -> Node i e -> Node i e
+changeContext f n = n { context = f <$> context n }
 
 
 -- | Auxiliary: Change the representative child node of an internal node.
-changeChild :: Node i e -> Node i e -> Node i e
-changeChild newChild node = case node of
-   Node (InternalNode lbl _) ctx -> Node (InternalNode lbl newChild) ctx
+changeFocus :: Node i e -> Node i e -> Node i e
+changeFocus newChild node = case node of
+   Node (Internal lbl _) ctx -> Node (Internal lbl newChild) ctx
    _ -> error "only internal nodes can have children"
 
 
@@ -166,36 +165,29 @@ changeRightSibling new = changeContext (\c -> c { rightSibling = new })
 -- | Move to the sibling left of the given node.
 left :: Node i e -> Maybe (Node i e)
 left node = do
-   ctx <- nodeContext node 
+   ctx <- context node 
    left' <- leftSibling ctx
-   let new = changeParent (changeChild new $ parent ctx) left'
+   let new = changeParent (changeFocus new $ parent ctx) left'
    return new
 
 
 -- | Move to the sibling right of the given node.
 right :: Node i e -> Maybe (Node i e)
 right node = do
-   ctx <- nodeContext node 
+   ctx <- context node 
    right' <- rightSibling ctx
-   let new = changeParent (changeChild new $ parent ctx) right'
+   let new = changeParent (changeFocus new $ parent ctx) right'
    return new
 
 
 -- | Ascend to the parent of the given node.
 up :: Node i e -> Maybe (Node i e)
-up = fmap parent . nodeContext
+up = fmap parent . context
 
 
 -- | Descend to the child of the given node that is currently in focus.
 down :: Node i e -> Maybe (Node i e)
 down node = changeParent node <$> focus node
-
-
--- | Auxiliary: Return the child that is currently in focus.
-focus :: Node i e -> Maybe (Node i e)
-focus node = case nodeContent node of
-   InternalNode _ m -> Just m
-   ExternalNode _ -> Nothing
 
 
 -- | Return the first child of the given node.
@@ -220,6 +212,13 @@ findInternal = undefined --TODO
 
 -------------------------------------------------------------------------------
 -- * Querying
+
+-- | Auxiliary: Return the child that is currently in focus.
+focus :: Node i e -> Maybe (Node i e)
+focus node = case plain node of
+   Internal _ m -> Just m
+   External _ -> Nothing
+
 
 -- | Return all children of the given node.
 children :: Node i e -> [Node i e]
@@ -248,9 +247,9 @@ leaves = rights . map content . descendants
 
 -- | Return the label of the given node.
 content :: Node i e -> Either i e
-content n = case nodeContent n of
-   InternalNode i _ -> Left i
-   ExternalNode e -> Right e
+content n = case plain n of
+   Internal i _ -> Left i
+   External e -> Right e
 
 
 -- | Return the tree of which the node is part.
@@ -261,7 +260,7 @@ tree = Tree . loop up
 -- | Return the subtree associated with a node, that is, the tree if it was cut
 -- at the current node.
 subtree :: Node i e -> Tree i e
-subtree = Tree . (\n -> n { nodeContext = Nothing })
+subtree = Tree . (\n -> n { context = Nothing })
 
 
 -- | Return the root node representing the tree.
@@ -271,7 +270,7 @@ root (Tree t) = t
 
 -- | Check if a node is the root node.
 isRoot :: Node i e -> Bool
-isRoot = isNothing . nodeContext
+isRoot = isNothing . context
 
 
 -- | Check if a node has no siblings.
