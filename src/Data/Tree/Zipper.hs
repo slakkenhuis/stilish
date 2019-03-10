@@ -36,6 +36,19 @@ loopCollect f x = case f x of
    Just y -> x : loopCollect f y
 
 
+-- | Transform an function on nodes to a function on trees.
+--
+-- For example;
+--
+--    let t = branch () [leaf 2, branch () [leaf 3]]
+--    withTree t $ addFront (leaf 1) >=> lastChild >=> addBack (leaf 4)
+withTree :: Monad m 
+         => Tree i e 
+         -> (Node i e -> m (Node i e)) 
+         -> m (Tree i e)
+withTree t f = fmap tree . f . root $ t
+
+
 --------------------------------------------------------------------------------
 -- * Construction
 
@@ -93,21 +106,39 @@ branch label (Tree firstChild : children) = Tree new
 
    where
    new = decorate . Internal label 
-       $ foldl addRight firstChild children
+       $ foldl insert firstChild children
    -- we don't have to do (setParent new firstChild) since that will be taken
    -- care of once we actually descend to the child
 
 
 -- | Insert a subtree to the right of the given node. The node must not be the
 -- root node. Return the new node.
-addRight :: Node i e -> Tree i e -> Node i e 
-addRight node = return node `addNodeAux` right node
+insertRight :: Node i e -> Tree i e -> Node i e 
+insertRight node = return node `insertNodeAux` right node
 
 
 -- | Insert a subtree to the left of the given node. The node must not be the
 -- root node. Return the new node.
-addLeft :: Node i e -> Tree i e -> Node i e 
-addLeft node = left node `addNodeAux` return node
+insertLeft :: Node i e -> Tree i e -> Node i e 
+insertLeft node = left node `insertNodeAux` return node
+
+
+-- | Alias for 'insertRight'.
+insert = insertRight
+
+
+-- | Add a subtree to the front of the children of a node.
+addFront :: Tree i e -> Node i e -> Maybe (Node i e)
+addFront t = (>>= up) . fmap (flip insertLeft t) . firstChild
+
+
+-- | Add a subtree to the back of the children of a node.
+addBack :: Tree i e -> Node i e -> Maybe (Node i e)
+addBack t = (>>= up) . fmap (flip insertRight t) . lastChild
+
+
+-- | Alias for 'addBack'.
+add = addBack
 
 
 -- | Delete the current node and the subtree under it. Will fail if the node is
@@ -123,8 +154,8 @@ delete n
 -- | Auxiliary: Add a subtree between two nodes that are supposedly adjacent
 -- siblings. Will be nonsensical if they are not, and will throw an error if
 -- one of them is a root node.
-addNodeAux :: Maybe (Node i e) -> Maybe (Node i e) -> Tree i e -> Node i e
-addNodeAux nodeLeft nodeRight (Tree node) = nodeCenter 
+insertNodeAux :: Maybe (Node i e) -> Maybe (Node i e) -> Tree i e -> Node i e
+insertNodeAux nodeLeft nodeRight (Tree node) = nodeCenter 
 
    where
    nodeUp = (nodeLeft <|> nodeRight) >>= parent
@@ -190,12 +221,12 @@ down node = setParent node <$> focus node
 
 -- | Return the first child of the given node.
 firstChild :: Node i e -> Maybe (Node i e)
-firstChild = down >=> return . loop left
+firstChild = fmap (loop left) . down
 
 
 -- | Return the last child of the given node.
 lastChild :: Node i e -> Maybe (Node i e)
-lastChild = down >=> return . loop right 
+lastChild = fmap (loop right) . down 
 
 
 -- | Find the first leaf node that satisfies the predicate.
@@ -248,6 +279,12 @@ content :: Node i e -> Either i e
 content n = case plain n of
    Internal i _ -> Left i
    External e -> Right e
+
+
+-- | Return the label of the given node for trees where all labels are of the
+-- same type.
+content' :: Node a a -> a
+content' = either id id . content
 
 
 -- | Return the tree of which the node is part.
