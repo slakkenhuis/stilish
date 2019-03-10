@@ -111,10 +111,14 @@ addLeft node = left node `addNodeAux` return node
 
 
 -- | Delete the current node and the subtree under it. Will fail if the node is
--- the root node or if it is the last remaining child of its parent.
+-- the root node or if it is the last remaining child of its parent. Returns
+-- the node to the left of the deleted node; if there is none, returns the node
+-- the right of it.
 delete :: Node i e -> Maybe (Node i e)
-delete node = undefined -- TODO
-
+delete n
+   =   setLeft (setRight (rightSibling n) <$> leftSibling n) <$> right n
+   <|> setRight (setLeft (leftSibling n) <$> rightSibling n) <$> left n
+      
 
 -- | Auxiliary: Add a subtree between two nodes that are supposedly adjacent
 -- siblings. Will be nonsensical if they are not, and will throw an error if
@@ -123,11 +127,11 @@ addNodeAux :: Maybe (Node i e) -> Maybe (Node i e) -> Tree i e -> Node i e
 addNodeAux nodeLeft nodeRight (Tree node) = nodeCenter 
 
    where
-   nodeUp = (nodeLeft <|> nodeRight) >>= up
+   nodeUp = (nodeLeft <|> nodeRight) >>= parent
    nodeCenter = node
       { parent = setChild nodeCenter <$> nodeUp
-      , leftSibling = setRight nodeCenter <$> nodeLeft
-      , rightSibling = setLeft nodeCenter <$> nodeRight
+      , leftSibling = setRight (Just nodeCenter) <$> nodeLeft
+      , rightSibling = setLeft (Just nodeCenter) <$> nodeRight
       }
 
 
@@ -144,13 +148,13 @@ setParent new node = node { parent = pure new }
 
 
 -- | Auxiliary: Change the left sibling of a non-root node.
-setLeft :: Node i e -> Node i e -> Node i e 
-setLeft new node = node { leftSibling = pure new }
+setLeft :: Maybe (Node i e) -> Node i e -> Node i e 
+setLeft new node = node { leftSibling = new }
 
 
 -- | Auxiliary: Change the left sibling of a non-root node.
-setRight :: Node i e -> Node i e -> Node i e 
-setRight new node = node { rightSibling = pure new }
+setRight :: Maybe (Node i e) -> Node i e -> Node i e 
+setRight new node = node { rightSibling = new }
 
 
 -------------------------------------------------------------------------------
