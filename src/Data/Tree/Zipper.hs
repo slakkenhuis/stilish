@@ -196,7 +196,7 @@ left :: Node i e -> Maybe (Node i e)
 left node = do
    parent' <- parent node
    left' <- leftSibling node
-   let new = setParent (setChild new parent') left'
+   let new = setRight (Just node) . setParent (setChild new parent') $ left'
    return new
 
 
@@ -205,7 +205,7 @@ right :: Node i e -> Maybe (Node i e)
 right node = do
    parent' <- parent node
    right' <- rightSibling node
-   let new = setParent (setChild new parent') right'
+   let new = setLeft (Just node) . setParent (setChild new parent') $ right'
    return new
 
 
