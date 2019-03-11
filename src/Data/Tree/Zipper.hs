@@ -36,7 +36,7 @@ loopCollect f x = case f x of
    Just y -> x : loopCollect f y
 
 
--- | Transform an function on nodes to a function on trees.
+-- | Transform a function on nodes to a function on trees.
 --
 -- For example;
 --
@@ -261,7 +261,7 @@ siblings n = reverse (loopCollect left n) ++ tail (loopCollect right n)
 
 -- | Return a list containing the current node and all its descendants.
 descendants :: Node i e -> [Node i e]
-descendants n = undefined -- TODO
+descendants n = n : concatMap descendants (children n)
 
 
 -- | Return the contents of all internal nodes. 
