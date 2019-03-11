@@ -56,6 +56,15 @@ withTree t f = fmap tree . f . root $ t
 newtype Tree internal external = Tree (Node internal external)
 
 
+-- | A 'LeafTree' is a tree where the internal nodes are unlabelled.
+type LeafTree a = Tree () a
+
+
+-- | A 'FullTree' is a tree where internal nodes and external nodes have the
+-- same type of label.
+type FullTree a = Tree a a
+
+
 -- | Each 'Node' in a 'Tree' is labelled with one of two seperate data types:
 -- one for internal and one for external nodes. Every node also has a context.
 -- This context allows us to move through the tree of which it is part.
