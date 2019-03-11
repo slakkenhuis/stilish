@@ -332,3 +332,17 @@ instance (Show i, Show e) => Show (Node i e) where
              show' (leveller ++ level) (children node) ++ 
              show' leveller            rest
 
+
+instance Foldable (Tree i) where
+   foldr f z = foldr f z . root
+
+instance Foldable (Node i) where
+   foldr f z = foldr' f z . loop rightSibling
+
+      where
+      foldr' f z node = 
+         let z' = case plain node of
+                     External x -> f x z
+                     Internal _ m -> foldr f z m
+         in maybe z' (\k -> foldr' f z' k) (leftSibling node)
+
