@@ -11,7 +11,7 @@ manipulation due to passing around the constituent part that is currently in
 -}
 module Data.Tree.Zipper where
 
-import Data.Maybe ( fromJust, isNothing )
+import Data.Maybe ( fromJust, isNothing, listToMaybe )
 import Data.Either ( lefts, rights )
 import Control.Applicative ( (<|>) )
 import Control.Monad ( (>=>) )
@@ -229,14 +229,29 @@ lastChild :: Node i e -> Maybe (Node i e)
 lastChild = fmap (loop right) . down 
 
 
--- | Find the first leaf node that satisfies the predicate.
-find :: (e -> Bool) -> Tree i e -> Node i e
-find = undefined --TODO
+-- | Find all nodes that satisfy the predicate.
+findAll :: (Either i e -> Bool) -> Tree i e -> [Node i e]
+findAll pred = filter (pred . content) . descendants . root
+
+
+-- | Find the external nodes that satisfy the predicate.
+findAllLeaf :: (e -> Bool) -> Tree i e -> [Node i e]
+findAllLeaf pred = findAll (either (const False) pred)
+
+
+-- | Find the internal nodes that satisfy the predicate.
+findAllBranch :: (i -> Bool) -> Tree i e -> [Node i e]
+findAllBranch pred = findAll (either pred (const False))
 
 
 -- | Find the first internal node that satisfies the predicate.
-findInternal :: (i -> Bool) -> Tree i e -> Node i e
-findInternal = undefined --TODO
+findLeaf :: (e -> Bool) -> Tree i e -> Maybe (Node i e)
+findLeaf pred = listToMaybe . findAllLeaf pred
+
+
+-- | Find the first internal node that satisfies the predicate.
+findBranch :: (i -> Bool) -> Tree i e -> Maybe (Node i e)
+findBranch pred = listToMaybe . findAllBranch pred
 
 
 -------------------------------------------------------------------------------
@@ -346,3 +361,5 @@ instance Foldable (Node i) where
                      Internal _ m -> foldr f z m
          in maybe z' (\k -> foldr' f z' k) (leftSibling node)
 
+      -- note that for trees of type (Tree a a), we could make a newtype that
+      -- folds over the values of internal nodes, too
