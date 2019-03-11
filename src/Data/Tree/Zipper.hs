@@ -9,7 +9,45 @@ Simply put, a Zipper tree is a purely functional datatype that allows for quick
 manipulation due to passing around the constituent part that is currently in
 'focus', together with contextual inforation. See Huet 1997.
 -}
-module Data.Tree.Zipper where
+module Data.Tree.Zipper 
+   ( withTree
+   , Tree
+   , LeafTree
+   , FullTree
+   , Node
+   , leaf
+   , branch
+   , insert
+   , insertRight
+   , insertLeft
+   , add
+   , addFront
+   , addBack
+   , delete
+   , left
+   , right
+   , up
+   , down
+   , firstChild
+   , lastChild
+   , findAll
+   , findLeaves
+   , findBranches
+   , findLeaf
+   , findBranch
+   , children
+   , siblings
+   , descendants
+   , branches
+   , leaves
+   , content
+   , content'
+   , tree
+   , subtree
+   , root
+   , isRoot
+   , isOnlyChild
+   ) where
 
 import Data.Maybe ( fromJust, isNothing, listToMaybe )
 import Data.Either ( lefts, rights )
@@ -243,24 +281,24 @@ findAll :: (Either i e -> Bool) -> Tree i e -> [Node i e]
 findAll pred = filter (pred . content) . descendants . root
 
 
--- | Find the external nodes that satisfy the predicate.
-findAllLeaf :: (e -> Bool) -> Tree i e -> [Node i e]
-findAllLeaf pred = findAll (either (const False) pred)
+-- | Find all external nodes that satisfy the predicate.
+findLeaves :: (e -> Bool) -> Tree i e -> [Node i e]
+findLeaves pred = findAll (either (const False) pred)
 
 
--- | Find the internal nodes that satisfy the predicate.
-findAllBranch :: (i -> Bool) -> Tree i e -> [Node i e]
-findAllBranch pred = findAll (either pred (const False))
+-- | Find all internal nodes that satisfy the predicate.
+findBranches :: (i -> Bool) -> Tree i e -> [Node i e]
+findBranches pred = findAll (either pred (const False))
 
 
 -- | Find the first internal node that satisfies the predicate.
 findLeaf :: (e -> Bool) -> Tree i e -> Maybe (Node i e)
-findLeaf pred = listToMaybe . findAllLeaf pred
+findLeaf pred = listToMaybe . findLeaves pred
 
 
 -- | Find the first internal node that satisfies the predicate.
 findBranch :: (i -> Bool) -> Tree i e -> Maybe (Node i e)
-findBranch pred = listToMaybe . findAllBranch pred
+findBranch pred = listToMaybe . findBranches pred
 
 
 -------------------------------------------------------------------------------
@@ -289,8 +327,8 @@ descendants n = n : concatMap descendants (children n)
 
 
 -- | Return the contents of all internal nodes. 
-internals :: Node i e -> [i]
-internals = lefts . map content . descendants
+branches :: Node i e -> [i]
+branches = lefts . map content . descendants
 
 
 -- | Return the contents of all external nodes.
