@@ -43,12 +43,17 @@ General philosophy
     often useful to have multiple windows occupying the same space. The 
     windows (or frames) can be rotated through, as in a carousel.
 
--   I have not yet decided whether to use X or Wayland, and which programming 
-    language to use. From what I can see, Wayland will have to be monolithic 
-    since I would have to change the whole compositor. I think I will use C 
-    for the X iteration, and Haskell or another high-level language if I will 
-    ever start a Wayland version.
+-   I have chosen to program in Haskell over C, because of the complexity and 
+    versatility of the software: it would take too long to prototype all that 
+    in C. Once the API is mature, I might start thinking about performance.
 
+-   There may be many different front-ends for the application. There can be 
+    an X version for use as an add-on to a stacking WM, a standalone X window 
+    manager version, a Wayland version (which, from what I can see, would 
+    *have* to be monolithic since it needs to be integrated with the 
+    compositor), and even a terminal version similar to `dvtm`. This is an 
+    attractive prospect, since it would mean consistent behaviour in all 
+    possible windowing environments.
 
 
 Behaviour
@@ -340,8 +345,8 @@ workspace, hide unmanaged, focus tiled/untiled, sticky window,
 
 configure: auto-create workspaces, auto-destroy workspaces, window gap in 
 pixels, margin-{top,bottom,right,left}, snap on move/minimize,maximize, 
-atuo-hide unmanaged window upon focusing managed windows, auto sticky floating 
-windows, auto-manage classes of windows
+auto-hide unmanaged window upon focusing managed windows, auto sticky floating 
+windows, auto-manage classes of windows, min-width, min-width-behaviour
 
 query: tree, window, status (tiled/floating/minimized/maximized)
 
