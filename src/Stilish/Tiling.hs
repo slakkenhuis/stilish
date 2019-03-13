@@ -7,6 +7,7 @@ module Stilish.Tiling where
 import qualified Data.Tree.Zipper as T
 import qualified Data.BoundingBox as BB
 
+type XClientWindow = Int
 type TilingTree = Maybe (T.Node Frame Window)
 type BoundingBox = BB.BoundingBox Integer
 
@@ -27,38 +28,34 @@ data Workspace = Workspace
    , tag :: String
    }
 
-data Frame = Frame
-   { orientation :: Orientation
-   , frameRatio :: Int
-   , frameBox :: BoundingBox 
+data Geometry = Geometry
+   { ratio :: Int
+   , box :: BoundingBox
    }
 
-data Window = Window
-   { xClientWin :: Int 
-   , windowRatio :: Int
-   , windowBox :: BoundingBox 
-   } 
+data Frame = Frame 
+   { frameGeometry :: Geometry
+   , orientation :: Orientation
+   }
+
+data Window = Window 
+   { windowGeometry :: Geometry
+   , xClientWindow :: XClientWindow
+   }
 
 -------------------------------------------------------------------------------
 
 class HasGeometry a where
-   setRatio :: Int -> a -> a
-   getRatio :: a -> Int
-   getBox :: a -> BoundingBox
-   setBox :: BoundingBox -> a -> a
-
-   withBox :: a -> (BoundingBox -> BoundingBox) -> a
-   withBox x f = flip setBox x . f . getBox $ x
-
-instance HasGeometry Frame where
-   setRatio ratio frame = frame { frameRatio = ratio }
-   getRatio = frameRatio
-   setBox box frame = frame { frameBox = box }
-   getBox = frameBox
+   getGeometry :: a -> Geometry
+   setGeometry :: Geometry -> a -> a
+   withGeometry :: a -> (Geometry -> Geometry) -> a
+   withGeometry x f = flip setGeometry x . f . getGeometry $ x
 
 instance HasGeometry Window where
-   setRatio ratio window = window { windowRatio = ratio }
-   getRatio = windowRatio
-   setBox box window = window { windowBox = box }
-   getBox = windowBox
+   setGeometry geom win = win { windowGeometry = geom }
+   getGeometry = windowGeometry
+
+instance HasGeometry Frame where
+   setGeometry geom frame = frame { frameGeometry = geom }
+   getGeometry = frameGeometry
 
