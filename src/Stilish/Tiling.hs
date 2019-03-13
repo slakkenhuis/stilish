@@ -10,6 +10,12 @@ import qualified Data.BoundingBox as BB
 type TilingTree = Maybe (T.Node Frame Window)
 type BoundingBox = BB.BoundingBox Integer
 
+data Compass
+   = North
+   | East
+   | South
+   | West
+
 data Orientation 
     = Vertical 
     | Horizontal
@@ -22,13 +28,37 @@ data Workspace = Workspace
    }
 
 data Frame = Frame
-   { frameProportion :: Integer
-   , orientation :: Orientation 
+   { orientation :: Orientation
+   , frameRatio :: Int
    , frameBox :: BoundingBox 
    }
 
 data Window = Window
-   { windowRatio :: Integer
-   , xClientWin :: Integer 
+   { xClientWin :: Int 
+   , windowRatio :: Int
    , windowBox :: BoundingBox 
    } 
+
+-------------------------------------------------------------------------------
+
+class HasGeometry a where
+   setRatio :: Int -> a -> a
+   getRatio :: a -> Int
+   getBox :: a -> BoundingBox
+   setBox :: BoundingBox -> a -> a
+
+   withBox :: a -> (BoundingBox -> BoundingBox) -> a
+   withBox x f = flip setBox x . f . getBox $ x
+
+instance HasGeometry Frame where
+   setRatio ratio frame = frame { frameRatio = ratio }
+   getRatio = frameRatio
+   setBox box frame = frame { frameBox = box }
+   getBox = frameBox
+
+instance HasGeometry Window where
+   setRatio ratio window = window { windowRatio = ratio }
+   getRatio = windowRatio
+   setBox box window = window { windowBox = box }
+   getBox = windowBox
+
