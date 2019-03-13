@@ -41,6 +41,8 @@ module Data.Tree.Zipper
    , branches
    , leaves
    , content
+   , contentLeaf
+   , contentBranch
    , content'
    , tree
    , subtree
@@ -49,10 +51,9 @@ module Data.Tree.Zipper
    , isOnlyChild
    ) where
 
-import Data.Maybe ( fromJust, isNothing, listToMaybe )
+import Data.Maybe ( isNothing, listToMaybe )
 import Data.Either ( lefts, rights )
 import Control.Applicative ( (<|>) )
-import Control.Monad ( (>=>) )
 
 -------------------------------------------------------------------------------
 -- * Auxiliaries
@@ -149,11 +150,11 @@ leaf = Tree . decorate . External
 -- list of subtrees must not be empty, since an internal node must have at
 -- least one child.
 branch :: i -> [Tree i e] -> Tree i e
-branch label (Tree firstChild : children) = Tree new
+branch label (Tree node : trees) = Tree new
 
    where
    new = decorate . Internal label 
-       $ foldl insert firstChild children
+       $ foldl insert node trees
    -- we don't have to do (setParent new firstChild) since that will be taken
    -- care of once we actually descend to the child
 
@@ -171,6 +172,7 @@ insertLeft node = left node `insertNodeAux` return node
 
 
 -- | Alias for 'insertRight'.
+insert :: Node i e -> Tree i e -> Node i e 
 insert = insertRight
 
 
@@ -185,6 +187,7 @@ addBack t = (>>= up) . fmap (flip insertRight t) . lastChild
 
 
 -- | Alias for 'addBack'.
+add :: Tree i e -> Node i e -> Maybe (Node i e)
 add = addBack
 
 
@@ -276,29 +279,31 @@ lastChild :: Node i e -> Maybe (Node i e)
 lastChild = fmap (loop right) . down 
 
 
--- | Find all nodes that satisfy the predicate.
-findAll :: (Either i e -> Bool) -> Tree i e -> [Node i e]
-findAll pred = filter (pred . content) . descendants . root
+-- | Find all nodes under the given node that satisfy the predicate.
+findAll :: (Either i e -> Bool) -> Node i e -> [Node i e]
+findAll predicate = filter (predicate . content) . descendants
 
 
--- | Find all external nodes that satisfy the predicate.
-findLeaves :: (e -> Bool) -> Tree i e -> [Node i e]
-findLeaves pred = findAll (either (const False) pred)
+-- | Find all external nodes under the given node that satisfy the predicate.
+findLeaves :: (e -> Bool) -> Node i e -> [Node i e]
+findLeaves predicate = findAll (either (const False) predicate)
 
 
--- | Find all internal nodes that satisfy the predicate.
-findBranches :: (i -> Bool) -> Tree i e -> [Node i e]
-findBranches pred = findAll (either pred (const False))
+-- | Find all internal nodes under the given node that satisfy the predicate.
+findBranches :: (i -> Bool) -> Node i e -> [Node i e]
+findBranches predicate = findAll (either predicate (const False))
 
 
--- | Find the first internal node that satisfies the predicate.
-findLeaf :: (e -> Bool) -> Tree i e -> Maybe (Node i e)
-findLeaf pred = listToMaybe . findLeaves pred
+-- | Find the first internal node under the given node that satisfies the
+-- predicate.
+findLeaf :: (e -> Bool) -> Node i e -> Maybe (Node i e)
+findLeaf predicate = listToMaybe . findLeaves predicate
 
 
--- | Find the first internal node that satisfies the predicate.
-findBranch :: (i -> Bool) -> Tree i e -> Maybe (Node i e)
-findBranch pred = listToMaybe . findBranches pred
+-- | Find the first internal node under the given node that satisfies the
+-- predicate.
+findBranch :: (i -> Bool) -> Node i e -> Maybe (Node i e)
+findBranch predicate = listToMaybe . findBranches predicate
 
 
 -------------------------------------------------------------------------------
@@ -341,6 +346,16 @@ content :: Node i e -> Either i e
 content n = case plain n of
    Internal i _ -> Left i
    External e -> Right e
+
+
+-- | Return the label of the given external node.
+contentLeaf :: Node i e -> Maybe e
+contentLeaf = either (const Nothing) Just . content
+
+
+-- | Return the label of the given internal node.
+contentBranch :: Node i e -> Maybe i
+contentBranch = either Just (const Nothing) . content
 
 
 -- | Return the label of the given node for trees where all labels are of the
@@ -399,14 +414,14 @@ instance Foldable (Tree i) where
    foldr f z = foldr f z . root
 
 instance Foldable (Node i) where
-   foldr f z = foldr' f z . loop rightSibling
+   foldr f accumulator = foldr' accumulator . loop rightSibling
 
       where
-      foldr' f z node = 
+      foldr' z node = 
          let z' = case plain node of
                      External x -> f x z
                      Internal _ m -> foldr f z m
-         in maybe z' (\k -> foldr' f z' k) (leftSibling node)
+         in maybe z' (\k -> foldr' z' k) (leftSibling node)
 
       -- note that for trees of type (Tree a a), we could make a newtype that
       -- folds over the values of internal nodes, too
