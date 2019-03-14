@@ -25,7 +25,6 @@ library
                      , aeson
   default-language:    Haskell2010
 
-
 executable stilish
   hs-source-dirs:      app
   main-is:             Main.hs
@@ -34,4 +33,15 @@ executable stilish
                      , bytestring >=0.10 && <0.11
                      , optparse-applicative
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -O2
+  default-language:    Haskell2010
+
+test-suite test
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Main.hs
+  build-depends:       base >= 4 && < 5
+                     , stilish
+                     , tasty >= 1.2
+                     , tasty-hunit
+                     , tasty-program
   default-language:    Haskell2010
