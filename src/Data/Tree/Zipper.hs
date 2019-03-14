@@ -53,6 +53,7 @@ module Data.Tree.Zipper
 
 import Data.Maybe ( isNothing, listToMaybe )
 import Data.Either ( lefts, rights )
+import Data.Function ( on )
 import Control.Applicative ( (<|>) )
 
 -------------------------------------------------------------------------------
@@ -122,7 +123,7 @@ data Node internal external = Node
 -- child occupies with respect to its siblings.
 data PlainNode i e 
    = Internal i (Node i e)
-   | External e
+   | External e 
 
 
 -- | Auxiliary: Extend a plain node with context.
@@ -410,6 +411,8 @@ instance (Show i, Show e) => Show (Node i e) where
              show' leveller            rest
 
 
+-- note that for trees of type (Tree a a), we could make a newtype that folds
+-- over the values of internal nodes, too
 instance Foldable (Tree i) where
    foldr f z = foldr f z . root
 
@@ -423,5 +426,29 @@ instance Foldable (Node i) where
                      Internal _ m -> foldr f z m
          in maybe z' (\k -> foldr' z' k) (leftSibling node)
 
-      -- note that for trees of type (Tree a a), we could make a newtype that
-      -- folds over the values of internal nodes, too
+
+-- For equality, the nodes must be indistinguishable by public functions.
+-- Therefore, they should not only have the same context, but also be part of
+-- the same tree and be focused on the same element.
+instance (Eq i, Eq e) => Eq (Tree i e) where
+   (==) = (==) `on` root
+
+instance (Eq i, Eq e) => Eq (Node i e) where
+   n == m = eqSub [n] [m] && eqLev n m && eqSup (up n) (up m)
+   
+      where
+
+      eqSup Nothing  Nothing  = True
+      eqSup (Just k) (Just l) = eqLev k l && eqSup (up k) (up l)
+      eqSup _        _        = False
+     
+      eqLev k s = 
+         eqSub (tail $ loopCollect left k) (tail $ loopCollect left s) &&
+         eqSub (tail $ loopCollect right k) (tail $ loopCollect right s)
+      
+      eqSub []     []     = True
+      eqSub (k:ks) (l:ls) = 
+         content k == content l && 
+         eqSub ks ls &&
+         eqSub (children k) (children l)
+      eqSub _      _      = False
