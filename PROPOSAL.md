@@ -51,9 +51,9 @@ General philosophy
     an X version for use as an add-on to a stacking WM, a standalone X window 
     manager version, a Wayland version (which, from what I can see, would 
     *have* to be monolithic since it needs to be integrated with the 
-    compositor), and even a terminal version similar to `dvtm`. This is an 
-    attractive prospect, since it would mean consistent behaviour in all 
-    possible windowing environments.
+    compositor), and even a terminal multiplexer version similar to `dvtm`, 
+    `byobu`, `tmux` and `screen`. This is an attractive prospect, since it 
+    would mean consistent behaviour in all possible windowing environments.
 
 
 Behaviour
@@ -167,6 +167,9 @@ Managing windows
         it should snap out of control as well. Conversely, hovering an 
         unmanaged window over a managed window for some time might snap it 
         into the tiling tree.
+
+    -   When a window is dragged to the edge of a screen and released, it 
+        should snap into position in a sensible way.
 
 
 

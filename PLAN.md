@@ -15,7 +15,18 @@ order, leaving the rest out of consideration until time comes.
 3.  Datastructures & geometry
 
     Write the tiling tree datastructures and calculations for positioning the 
-    windows.
+    windows. Also write a simple box visualisation (without worrying about 
+    actual terminal multiplexing!) for testing. Find a library for terminal 
+    multiplexing/emulation
+
+
+           ┌────2/3┬────┐
+           │       │    │
+           │       │    │
+           │       │    │
+           └───────┴────┘
+
+
 
 4.  Window control
 
