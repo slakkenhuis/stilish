@@ -18,13 +18,14 @@ General philosophy
     standalone window manager. Instead, it is a layer to be applied on top of 
     your favourite stacking WM. (See also 
     [pytyle](https://github.com/BurntSushi/pytyle1), 
-    [pytyle3](https://github.com/BurntSushi/pytyle3).) Whatever configuration 
-    you had set up already — you can probably keep it. (A more minimalist, 
+    [pytyle3](https://github.com/BurntSushi/pytyle3), 
+    [zentile](https://github.com/blrsn/zentile).) Whatever configuration you 
+    had set up already — you can probably keep it. (A more minimalist, 
     monolithic WM with similar tiling behaviour could be made later, and the 
     code should anticipate that; but it would be a separate program that 
     merely shares some of the codebase.)
 
--   Only the developer should ever have to think about the structure of the 
+-   Only the developer should ever have to think about the *structure* of the 
     tiling tree. For the user, the movements should feel obvious.
 
 -   To reduce the mental load, it helps to have as few keyboard shortcuts as 
@@ -43,12 +44,13 @@ General philosophy
     often useful to have multiple windows occupying the same space. The 
     windows (or frames) can be rotated through, as in a carousel.
 
--   I have not yet decided whether to use X or Wayland, and which programming 
-    language to use. From what I can see, Wayland will have to be monolithic 
-    since I would have to change the whole compositor. I think I will use C 
-    for the X iteration, and Haskell or another high-level language if I will 
-    ever start a Wayland version.
-
+-   There may be many different front-ends for the application. There can be 
+    an X version for use as an add-on to a stacking WM, a standalone X window 
+    manager version, a Wayland version (which, from what I can see, would 
+    *have* to be monolithic since it needs to be integrated with the 
+    compositor), and even a terminal multiplexer version similar to `dvtm`, 
+    `byobu`, `tmux` and `screen`. This is an attractive prospect, since it 
+    would mean consistent behaviour in all possible windowing environments.
 
 
 Behaviour
@@ -163,6 +165,9 @@ Managing windows
         unmanaged window over a managed window for some time might snap it 
         into the tiling tree.
 
+    -   When a window is dragged to the edge of a screen and released, it 
+        should snap into position in a sensible way.
+
 
 
 Movement and focus
@@ -241,6 +246,11 @@ Movement and focus
 Resizing and appearance
 -------------------------------------------------------------------------------
 
+-   There should be a "preferred width" and "preferred height" for specific 
+    windows. For example, an urxvt window is preferably only a certain width, 
+    so when it is opened alongside another window, the other window should be 
+    larger.
+
 -   The window size can be tracked in absolutes - so and so window has this 
     many pixels - but that is already computed by X itself, and calculating 
     with those sizes is difficult because changes to one window effect changes 
@@ -308,6 +318,14 @@ Workspaces and desktops
     automatically.
 
 
+Other
+-------------------------------------------------------------------------------
+
+Since not all window managers and environments will be able to support all 
+features, there should be a list of all features and which of those are 
+enabled.
+
+
 
 Technicalities
 ===============================================================================
@@ -340,8 +358,8 @@ workspace, hide unmanaged, focus tiled/untiled, sticky window,
 
 configure: auto-create workspaces, auto-destroy workspaces, window gap in 
 pixels, margin-{top,bottom,right,left}, snap on move/minimize,maximize, 
-atuo-hide unmanaged window upon focusing managed windows, auto sticky floating 
-windows, auto-manage classes of windows
+auto-hide unmanaged window upon focusing managed windows, auto sticky floating 
+windows, auto-manage classes of windows, min-width, min-width-behaviour
 
 query: tree, window, status (tiled/floating/minimized/maximized)
 

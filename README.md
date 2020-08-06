@@ -1,28 +1,23 @@
 stilish (work-in-progress)
 ===============================================================================
 
-`stilish` is — or rather *will be* — a simple, modular tool for organising the 
+`stilish` will be a simple, modular, *versatile* tool for organising the 
 windows on your desktop.
 
-It is being written because I got tired of the clunkiness of stacking WMs; of 
-the assumptions that dynamic tiling WMs make; of the mental burden that manual 
+It is written because I got tired of the clunkiness of stacking WMs; of the 
+assumptions that dynamic tiling WMs make; of the mental burden that manual 
 tiling WMs place on the user; and of how time-consuming it is to try all of 
 them only to come to this conclusion. 
 
-At the moment, `stilish` is only an idea. I am currently fleshing it out by 
-writing a [proposal](PROPOSAL.md). Since it's a hobby project, I'm more 
-concerned with 'getting it right' than with delivering — I will work on it 
-very sporadically, in my free time. Moreover, it is exhausting even to *look* 
-at the documentation for X; so I'll be happy if I can achieve only part of my 
-proposal. Therefore, unless other developers take an interest, it will 
-probably take a while before the actual program is finished.
-
+At the moment, `stilish` is only an idea. I am currently fleshing it out. 
+Since it's a hobby project, work on it will be sporadic and I'm allowing for 
+perfectionism to delay delivery.
 
 
 Supporting programs
 -------------------------------------------------------------------------------
 
-Since `stilish` is quite modular, you will want additional software to get a 
+Since `stilish` is modular, you will need additional software to get a 
 complete working environment. I can only suggest what I have tried:
 
 -   It shouldn't really matter what underlying window manager you use, as long 
@@ -50,7 +45,6 @@ complete working environment. I can only suggest what I have tried:
     [xcape](https://github.com/alols/xcape) or 
     [caps2esc](https://gitlab.com/interception/linux/plugins/caps2esc) tools, 
     since they improved my workflow.
-
 
 
 License
