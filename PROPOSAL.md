@@ -1,5 +1,5 @@
 ---
-title: "Proposal for `stilish` window manager manager"
+title: "Proposal for `versatiler` window manager manager"
 ---
 
 General philosophy
@@ -14,7 +14,7 @@ General philosophy
     a status bar or even keyboard handling is included — the only real 
     functionality is window arrangement.
 
--   Still in pursuit of modularity, `stilish` is not meant to be used as a 
+-   Still in pursuit of modularity, `versatiler` is not meant to be used as a 
     standalone window manager. Instead, it is a layer to be applied on top of 
     your favourite stacking WM. (See also 
     [pytyle](https://github.com/BurntSushi/pytyle1), 
@@ -109,7 +109,7 @@ Tiling tree
         └─────┘  └──┴─┘  └──┴─┘  └──┴┴┘
     
     I have found that this does not work too well for me. Although it should 
-    still be an option in `stilish`, I would personally prefer that any 
+    still be an option in `versatiler`, I would personally prefer that any 
     additional windows are added as a single array of windows next to the main 
     window, either vertically or horizontally, as shown below. Different 
     layouts are achieved by manually dragging your windows to the desired 
@@ -133,7 +133,7 @@ Managing windows
 -   Each workspace may have *managed* and *unmanaged* windows. The former 
     category consists of those windows which are attached to a tiling tree and 
     which obey its rules. Those in the latter category behave as much as 
-    possible as if `stilish` weren't running at all: they are floating and can 
+    possible as if `versatiler` weren't running at all: they are floating and can 
     be minimised and maximised.
 
 -   To keep a clear distinction, managed windows are always stacked lower than 
@@ -149,7 +149,7 @@ Managing windows
     as possible when full-screen is toggled off again.
 
 -   There should be a mechanism for automatically managing or releasing 
-    windows from the `stilish` tiling tree when triggered by X events. In 
+    windows from the `versatiler` tiling tree when triggered by X events. In 
     particular:
 
     -   It should be possible to automatically attach newly opened windows to 
@@ -160,7 +160,7 @@ Managing windows
         When you attempt to do that to a managed window, it should be 
         automatically *detached* from the tiling tree.
 
-    -   Perhaps when a window is moved by the user but not through `stilish`, 
+    -   Perhaps when a window is moved by the user but not through `versatiler`, 
         it should snap out of control as well. Conversely, hovering an 
         unmanaged window over a managed window for some time might snap it 
         into the tiling tree.

@@ -1,15 +1,15 @@
-stilish (work-in-progress)
+versatiler (work-in-progress)
 ===============================================================================
 
-`stilish` will be a simple, modular, *versatile* tool for organising the 
-windows on your desktop.
+The `versatiler` will be a simple, modular tool for organising the windows on 
+your desktop.
 
 It is written because I got tired of the clunkiness of stacking WMs; of the 
 assumptions that dynamic tiling WMs make; of the mental burden that manual 
 tiling WMs place on the user; and of how time-consuming it is to try all of 
 them only to come to this conclusion. 
 
-At the moment, `stilish` is only an idea. I am currently fleshing it out. 
+At the moment, `versatiler` is only an idea. I am currently fleshing it out. 
 Since it's a hobby project, work on it will be sporadic and I'm allowing for 
 perfectionism to delay delivery.
 
@@ -17,7 +17,7 @@ perfectionism to delay delivery.
 Supporting programs
 -------------------------------------------------------------------------------
 
-Since `stilish` is modular, you will need additional software to get a 
+Since `versatiler` is modular, you will need additional software to get a 
 complete working environment. I can only suggest what I have tried:
 
 -   It shouldn't really matter what underlying window manager you use, as long 
@@ -26,7 +26,7 @@ complete working environment. I can only suggest what I have tried:
     [xfwm](https://docs.xfce.org/xfce/xfwm4/start), or 
     [windowchef](https://github.com/tudurom/windowchef).
 
--   To interact with `stilish`, you will need to exchange messages with it. 
+-   To interact with `versatiler`, you will need to exchange messages with it. 
     [jq](https://stedolan.github.io/jq/) is useful for composing and parsing 
     JSON messages, and [socat](http://www.dest-unreach.org/socat/) can send 
     and receive them. Of course, you will mostly be sending straightforward 
@@ -50,4 +50,4 @@ complete working environment. I can only suggest what I have tried:
 License
 -------------------------------------------------------------------------------
 
-`stilish` is fully free and open-source software, released under GPLv3.
+`versatiler` is fully free and open-source software, released under GPLv3.
